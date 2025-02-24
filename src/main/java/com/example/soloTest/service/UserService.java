@@ -3,6 +3,7 @@ package com.example.soloTest.service;
 import com.example.soloTest.dto.request.LoginRequest;
 import com.example.soloTest.dto.request.UserRequest;
 import com.example.soloTest.dto.response.UserResponse;
+import com.example.soloTest.exception.DataNotFoundException;
 import com.example.soloTest.exception.DuplicateDataException;
 import com.example.soloTest.model.User;
 import com.example.soloTest.repository.UserRepository;
@@ -116,6 +117,21 @@ public class UserService implements UserDetailsService {
         user = userRepository.save(user);
 
         return convertToResponse(user);
+    }
+
+    // delete user
+    @Transactional
+    public void deleteUser(UUID userId) {
+        try {
+            if(!userRepository.existsById(userId)) {
+                throw new DataNotFoundException("Todolist with id " + userId + " not found");
+            }
+            userRepository.deleteById(userId);
+        } catch (DataNotFoundException e){
+            throw e;
+        }catch (Exception e) {
+            throw new RuntimeException("Failed to delete todolist" + e.getMessage(), e);
+        }
     }
 
     // convert to response

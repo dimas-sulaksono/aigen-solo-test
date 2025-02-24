@@ -5,6 +5,7 @@ import com.example.soloTest.dto.request.UserRequest;
 import com.example.soloTest.dto.response.ApiResponse;
 import com.example.soloTest.dto.response.PaginatedResponse;
 import com.example.soloTest.dto.response.UserResponse;
+import com.example.soloTest.exception.DataNotFoundException;
 import com.example.soloTest.exception.DuplicateDataException;
 import com.example.soloTest.repository.UserRepository;
 import com.example.soloTest.service.UserService;
@@ -89,6 +90,23 @@ public class UserController {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to retrieve user: " + e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/delete/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable("userId") UUID userId) {
+        try {
+            userService.deleteUser(userId);
+            return ResponseEntity
+                    .ok(new ApiResponse<>(HttpStatus.OK.value(), "User deleted successfully"));
+        } catch (DataNotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>(404, e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to delete user: "+ e.getMessage()));
         }
     }
 
