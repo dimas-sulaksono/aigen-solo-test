@@ -29,6 +29,7 @@ public class UserController {
 
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    // register
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRequest userRequest){
         try {
@@ -46,6 +47,7 @@ public class UserController {
         }
     }
 
+    // get user by username
     @GetMapping("/{username}")
     public ResponseEntity<?> getUserByUsername(@PathVariable String username){
         try{

@@ -35,6 +35,7 @@ public class UserService implements UserDetailsService {
     }
 
     // register
+    @Transactional
     public UserResponse registerUser(UserRequest userRequest){
         Optional<User> existingUser = userRepository.findByUsername(userRequest.getUsername());
         if (existingUser.isPresent()) {
