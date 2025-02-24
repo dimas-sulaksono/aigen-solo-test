@@ -1,5 +1,6 @@
 package com.example.soloTest.controller;
 
+import com.example.soloTest.dto.request.LoginRequest;
 import com.example.soloTest.dto.request.UserRequest;
 import com.example.soloTest.dto.response.ApiResponse;
 import com.example.soloTest.dto.response.UserResponse;
@@ -44,6 +45,19 @@ public class UserController {
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse<>(500, e.getMessage()));
+        }
+    }
+
+    // login
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest){
+        try {
+            UserResponse userResponse = userService.loginUser(loginRequest);
+            String token = jwtUtil.generateToken(userResponse.getUsername());
+            return ResponseEntity.ok(new ApiResponse<String>(200, token));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse<String>(401, "invalid username or password"));
         }
     }
 

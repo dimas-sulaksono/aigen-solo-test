@@ -1,5 +1,6 @@
 package com.example.soloTest.service;
 
+import com.example.soloTest.dto.request.LoginRequest;
 import com.example.soloTest.dto.request.UserRequest;
 import com.example.soloTest.dto.response.UserResponse;
 import com.example.soloTest.exception.DuplicateDataException;
@@ -56,6 +57,17 @@ public class UserService implements UserDetailsService {
         user = userRepository.save(user);
         User register = userRepository.save(user);
         return convertToResponse(register);
+    }
+
+    // login
+    public UserResponse loginUser(LoginRequest loginRequest){
+        Optional<User> userOptional = userRepository.findByUsername(loginRequest.getUsername());
+        if (userOptional.isEmpty()){
+            throw new RuntimeException("User not found with username: "+ loginRequest.getUsername());}
+        User user = userOptional.get();
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid password");}
+        return convertToResponse(user);
     }
 
     // cari user berdasarkan username
