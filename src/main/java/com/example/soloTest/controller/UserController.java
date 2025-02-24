@@ -3,12 +3,14 @@ package com.example.soloTest.controller;
 import com.example.soloTest.dto.request.LoginRequest;
 import com.example.soloTest.dto.request.UserRequest;
 import com.example.soloTest.dto.response.ApiResponse;
+import com.example.soloTest.dto.response.PaginatedResponse;
 import com.example.soloTest.dto.response.UserResponse;
 import com.example.soloTest.exception.DuplicateDataException;
 import com.example.soloTest.repository.UserRepository;
 import com.example.soloTest.service.UserService;
 import com.example.soloTest.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -71,5 +73,22 @@ public class UserController {
             return ResponseEntity.status(404).body(new ApiResponse<>(404, e.getMessage()));
         }
     }
+
+    // get all users
+    @GetMapping
+    public ResponseEntity<?> getAllUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        try {
+            Page<?> users = userService.findAll(page, size);
+            return ResponseEntity
+                    .ok(new PaginatedResponse<>(200, users));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to retrieve user: " + e.getMessage()));
+        }
+    }
+
 
 }

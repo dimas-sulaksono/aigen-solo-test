@@ -10,6 +10,9 @@ import com.example.soloTest.security.CustomUserDetails;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -77,6 +80,17 @@ public class UserService implements UserDetailsService {
             return convertToResponse(user.get());
         } else {
             throw new RuntimeException("User not found with username: " + username);
+        }
+    }
+
+    // get all users
+    public Page<UserResponse> findAll(int page, int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<User> users = userRepository.findAllByOrderByUsernameAsc(pageable);
+            return users.map(this::convertToResponse);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to find all users: " + e.getMessage(), e);
         }
     }
 
