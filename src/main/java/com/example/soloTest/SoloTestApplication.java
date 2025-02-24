@@ -10,4 +10,5 @@ public class SoloTestApplication {
 		SpringApplication.run(SoloTestApplication.class, args);
 	}
 
+
 }

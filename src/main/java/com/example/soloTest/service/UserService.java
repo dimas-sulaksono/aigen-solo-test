@@ -1,9 +1,12 @@
 package com.example.soloTest.service;
 
+import com.example.soloTest.dto.request.UserRequest;
 import com.example.soloTest.dto.response.UserResponse;
+import com.example.soloTest.exception.DuplicateDataException;
 import com.example.soloTest.model.User;
 import com.example.soloTest.repository.UserRepository;
 import com.example.soloTest.security.CustomUserDetails;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +34,30 @@ public class UserService implements UserDetailsService {
         return new CustomUserDetails(user);
     }
 
+    // register
+    public UserResponse registerUser(UserRequest userRequest){
+        Optional<User> existingUser = userRepository.findByUsername(userRequest.getUsername());
+        if (existingUser.isPresent()) {
+            throw new DuplicateDataException("User already exists with username: " + userRequest.getUsername());}
+
+        Optional<User> existingEmail = userRepository.findByEmail(userRequest.getEmail());
+        if (existingEmail.isPresent()) {
+            throw new DuplicateDataException("Email already registered: " + userRequest.getEmail());}
+
+        if (userRequest.getPassword().length() < 8) {
+            throw new RuntimeException("Password must be at least 8 characters long");}
+
+        User user = new User();
+        user.setUsername(userRequest.getUsername());
+        user.setEmail(userRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        user.setRole(Optional.ofNullable(userRequest.getRole()).orElse("CUSTOMER"));
+        user = userRepository.save(user);
+        User register = userRepository.save(user);
+        return convertToResponse(register);
+    }
+
+    // cari user berdasarkan username
     public UserResponse getUserByUsername(String username) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
@@ -40,6 +67,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    // convert to response
     private UserResponse convertToResponse(User user){
         UserResponse userResponse = new UserResponse();
         userResponse.setUuid(user.getId());
