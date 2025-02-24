@@ -17,6 +17,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("api/user")
 public class UserController {
@@ -90,5 +92,18 @@ public class UserController {
         }
     }
 
+    // update user
+    @PutMapping("/update/{userId}")
+    public ResponseEntity<?> updateUser(@PathVariable UUID userId, @RequestBody UserRequest userRequest) {
+        try {
+            UserResponse userResponse = userService.updateUser(userId, userRequest);
+            return ResponseEntity.ok().body(new ApiResponse<>(200, userResponse));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(404, "User not found"));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(500, e.getMessage()));
+        }
+    }
 
 }

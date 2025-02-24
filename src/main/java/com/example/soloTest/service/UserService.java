@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -92,6 +93,29 @@ public class UserService implements UserDetailsService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to find all users: " + e.getMessage(), e);
         }
+    }
+
+    // update user
+    @Transactional
+    public UserResponse updateUser(UUID userId, UserRequest userRequest) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            throw new RuntimeException("User not found with id: " + userId);
+        }
+
+        User user = userOptional.get();
+        if (userRequest.getUsername() != null) {
+            user.setUsername(userRequest.getUsername());
+        }
+        if (userRequest.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        }
+        if (userRequest.getRole() != null) {
+            user.setRole(userRequest.getRole());
+        }
+        user = userRepository.save(user);
+
+        return convertToResponse(user);
     }
 
     // convert to response
